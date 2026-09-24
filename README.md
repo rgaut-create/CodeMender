@@ -1,65 +1,37 @@
-# CodeMender End-to-End Vulnerable Python Demo App
+# 🛡️ CodeMender CI/CD Automated Security Remediation Demo
 
-This repository provides an **end-to-end, runnable demo app** for showcasing **Google CodeMender** integration in GitHub Actions CI/CD pipelines.
-
----
-
-## 📁 Repository Structure
-
-```
-├── app.py                      # Flask REST API containing 3 vulnerabilities (SQLi, IDOR, RCE)
-├── test_app.py                 # Pytest suite verifying functional behavior
-├── requirements.txt            # Python dependencies (flask, pytest)
-├── push_to_github.sh           # Helper script to initialize git and push to your GitHub repo
-├── .codemender/
-│   └── config.yaml             # CodeMender CLI non-interactive CI/CD settings
-└── .github/
-    └── workflows/
-        └── codemender-cicd.yml # Production-ready GitHub Actions workflow
-```
+This repository demonstrates **CodeMender**—Google's autonomous AI security engineer—integrated directly into a GitHub Actions CI/CD pipeline using **Workload Identity Federation (WIF)** for keyless authentication to Google Cloud Vertex AI.
 
 ---
 
-## 🔒 Vulnerabilities Included in `app.py`
+## 📚 Customer Presentation Decks & Guides
 
-1. **SQL Injection (SQLi)**: `/api/user/search?username=' OR 1=1 --`
-   * Vulnerable string concatenation query.
-   * **CodeMender Fix**: Replaces string formatting with parameterized SQLite placeholders `(username,)`.
+All customer presentation scripts, PowerPoint slides, PDFs, and architecture flowcharts are available in the [`docs/`](./docs) folder:
 
-2. **Insecure Direct Object Reference (IDOR)**: `/api/documents/<doc_id>`
-   * Missing ownership check (`owner_id == current_user_id`).
-   * **CodeMender Fix**: Adds ownership validation check against `X-User-ID` header.
-
-3. **Command Injection (RCE)**: `/api/tools/ping` (POST `{"host": "127.0.0.1; cat /etc/passwd"}`)
-   * Direct `os.system` invocation.
-   * **CodeMender Fix**: Uses `subprocess.run` with list arguments (`shell=False`) or input sanitization.
+| Asset | Format | Direct Link | Description |
+| :--- | :--- | :--- | :--- |
+| **PowerPoint Slide Deck** | `.pptx` | [`docs/CodeMender_Architecture_and_Overview.pptx`](./docs/CodeMender_Architecture_and_Overview.pptx) | Editable PowerPoint presentation covering architecture & ROI |
+| **Customer Presentation Script** | `.md` / `.pdf` | [`docs/CodeMender_Customer_Presentation_Guide.md`](./docs/CodeMender_Customer_Presentation_Guide.md) / [`PDF`](./docs/CodeMender_Customer_Presentation_Guide.pdf) | Step-by-step click-by-click script for presenting to customers |
+| **Architecture Slide Deck** | `.md` / `.pdf` | [`docs/CodeMender_Architecture_Presentation.md`](./docs/CodeMender_Architecture_Presentation.md) / [`PDF`](./docs/CodeMender_Architecture_Presentation.pdf) | Technical architecture & keyless WIF security design slides |
+| **CI/CD Flowchart** | `.md` | [`docs/CodeMender_CICD_Flow_Diagram.md`](./docs/CodeMender_CICD_Flow_Diagram.md) | Mermaid workflow diagram of CodeMender pipeline execution |
 
 ---
 
-## 🚀 Quick Start: Pushing to Your GitHub Repository
+## 🚀 Live Demo Quick Links
 
-1. Open your terminal and navigate to this folder:
-   ```bash
-   cd /usr/local/google/home/rgaut/.gemini/jetski/brain/ef1223b3-fe9e-4d7c-ab14-a41210d6b62a/demo-codemender-python-app
-   ```
-
-2. Run the push helper script with your GitHub repository URL:
-   ```bash
-   ./push_to_github.sh https://github.com/<YOUR_GITHUB_ORG_OR_USER>/<YOUR_REPO_NAME>.git
-   ```
-
-3. Ensure GitHub Secrets are set under **Settings -> Secrets and variables -> Actions**:
-   * `WIF_PROVIDER`: Your GCP Workload Identity Provider ID.
-   * `WIF_SERVICE_ACCOUNT`: Your GCP Service Account email.
-   * `GCP_PROJECT_ID`: Your GCP Project ID.
+1. **Vulnerable Application Code**: [`app.py`](./app.py)
+2. **GitHub Security Alerts**: [Security $\rightarrow$ Code scanning](https://github.com/rgaut-create/CodeMender/security/code-scanning)
+3. **CI/CD Pipeline Runs**: [Actions $\rightarrow$ Workflows](https://github.com/rgaut-create/CodeMender/actions)
+4. **Automated Remediation PR**: [Pull Requests $\rightarrow$ PR #1](https://github.com/rgaut-create/CodeMender/pull/1)
 
 ---
 
-## 🎬 How to Perform the Live Customer Demo
+## 🛠️ Application & Security Features
 
-1. **Trigger Scan**: Open a Pull Request or push a commit to `main`.
-2. **Watch Pipeline**: Observe the GitHub Actions workflow running:
-   - `cm find` detects all 3 vulnerabilities in `app.py`.
-   - `cm report --format sarif` posts alerts directly into **GitHub Security -> Code Scanning**.
-3. **Automated Remediation**: CodeMender runs `cm verify` (exploit validation) and `cm fix` (patch generation).
-4. **Fix Pull Request**: CodeMender automatically creates a new PR titled `🛡️ [CodeMender] Automated Vulnerability Remediation` containing clean, verified patches for `app.py`.
+- **Vulnerable Endpoints in `app.py`**:
+  - `/api/user/search`: SQL Injection (`CWE-89`)
+  - `/api/documents/<id>`: Insecure Direct Object Reference / IDOR (`CWE-639`)
+  - `/api/tools/ping`: Remote OS Command Execution (`CWE-78`)
+- **Pytest Suite**: [`test_app.py`](./test_app.py) for regression testing pre- and post-patching.
+- **Keyless Authentication**: Google Cloud Workload Identity Federation (WIF) OIDC token exchange.
+- **SARIF 2.1.0 Export**: Direct upload into GitHub Code Scanning security hub.
