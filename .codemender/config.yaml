@@ -1,0 +1,21 @@
+server:
+  endpoint: "https://aiplatform.googleapis.com"
+
+model: "gemini-3.5-flash"
+
+scan:
+  extensions:
+    include: [".py"]
+    exclude: ["__pycache__/", ".pytest_cache/"]
+  max_file_size_kb: 500
+  incremental: true
+
+tools:
+  confirm_commands: false
+  confirm_writes: false
+
+vcs:
+  type: "git"
+  commands:
+    reset: "git checkout HEAD -- . && git clean -fd"
+    diff: "git diff"
