@@ -66,7 +66,7 @@ jobs:
       - name: Execute CodeMender Scan (cm find)
         run: |
           echo "Scanning Python codebase for vulnerabilities..."
-          cm find app.py --yes || true
+          cm find app.py --yes --unrestricted || true
 
       - name: Export SARIF Findings & Upload to GitHub Security
         run: |
@@ -87,10 +87,10 @@ jobs:
           
           for ID in $FINDINGS; do
             echo "Running Verification for Finding: $ID"
-            cm verify "$ID" --yes || true
+            cm verify "$ID" --yes --unrestricted || true
             
             echo "Applying CodeMender Patch for Finding: $ID"
-            cm fix "$ID" --yes --bypass-warning || true
+            cm fix "$ID" --yes --unrestricted --bypass-warning || true
           done
 
       - name: Create Fix Pull Request
