@@ -1,6 +1,6 @@
 # 🛡️ CodeMender: Shift-Left SDLC Security Automation & CI/CD Demo
 
-This repository demonstrates **CodeMender**—Google's autonomous AI security engineer—integrated directly into the **Software Development Life Cycle (SDLC)** using a **Shift-Left Security Approach**.
+This repository demonstrates **CodeMender**—Google's autonomous AI security Agent—integrated directly into the **Software Development Life Cycle (SDLC)** using a **Shift-Left Security Approach**.
 
 Using **Workload Identity Federation (WIF)** for keyless authentication to Google Cloud Vertex AI (`gemini-3.8-flash`), CodeMender automatically scans code, synthesizes exploit payloads to eliminate false positives, reports SARIF 2.1.0 findings to GitHub Security, and opens verified remediation Pull Requests.
 
