@@ -1,0 +1,136 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeMender",
+          "version": "dev"
+        }
+      },
+      "results": [
+        {
+          "ruleId": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+          "level": "error",
+          "message": {
+            "text": "SQL Injection in /api/user/search via username Parameter: - **Source**: Untrusted user input enters the endpoint via `request.args.get('username', '')` on line 65.\n- **Sanitization/Validation**: No validation, escaping, or parameterization is performed. The string is directly interpolated into the SQL query using an f-string.\n- **Sink**: The constructed query string is passed directly into `cursor.execute(query)` on line 72.\n- **Data Flow**: The attacker provides a crafted `username` query parameter -> Flask parses it into `username` -> f-string formatting injects raw SQL into `query` -> `cursor.execute(query)` executes the statement against the SQLite database.\n\n**Conceptual Exploit Payload**:\nSend a GET request with an SQL injection payload in the `username` parameter to extract all user records or bypass authentication:\n```http\nGET /api/user/search?username=%27+OR+1%3D1+-- HTTP/1.1\nHost: localhost:5000\n```\nWhen formatted, the query becomes:\n`SELECT id, username, email, role FROM users WHERE username = '' OR 1=1 --'`\nThis forces the WHERE clause to evaluate to true for every record in the `users` table, returning all users."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 70,
+                  "endLine": 72
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
+          "level": "error",
+          "message": {
+            "text": "OS Command Injection in /api/tools/ping via host Parameter: - **Source**: Untrusted user input enters the endpoint via the JSON request payload field `host` (`data.get('host', '')`) on line 107.\n- **Sanitization/Validation**: The application only checks that the field is non-empty (`if not host:`). It performs no validation, whitelisting (e.g. IP address or hostname validation), or shell escaping.\n- **Sink**: The unvalidated string is formatted into `command = f\"ping -c 1 {host}\"` and executed directly via `os.system(command)` on line 114, which spawns a system shell (`/bin/sh -c`).\n- **Data Flow**: The client posts a JSON payload containing shell metacharacters -> `host` is extracted -> String interpolation constructs the shell command -> `os.system` executes the command with shell interpretation, executing attacker-supplied commands with the privileges of the web application process.\n\n**Conceptual Exploit Payload**:\nSend a POST request with command chaining operators (e.g., `;`, `&&`, or `|`) in the `host` parameter:\n```http\nPOST /api/tools/ping HTTP/1.1\nHost: localhost:5000\nContent-Type: application/json\n\n{\n  \"host\": \"127.0.0.1; cat /etc/passwd\"\n}\n```\nThe resulting shell execution will run `ping -c 1 127.0.0.1` followed by `cat /etc/passwd`."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 113,
+                  "endLine": 114
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CWE-89",
+          "level": "error",
+          "message": {
+            "text": "SQL Injection in /api/user/search via username Parameter: - **Source**: Untrusted user input enters the endpoint via `request.args.get('username', '')` on line 65.\n- **Sanitization/Validation**: No validation, escaping, or parameterization is performed. The string is directly interpolated into the SQL query using an f-string.\n- **Sink**: The constructed query string is passed directly into `cursor.execute(query)` on line 72.\n- **Data Flow**: The attacker provides a crafted `username` query parameter -> Flask parses it into `username` -> f-string formatting injects raw SQL into `query` -> `cursor.execute(query)` executes the statement against the SQLite database.\n\n**Conceptual Exploit Payload**:\nSend a GET request with an SQL injection payload in the `username` parameter to extract all user records or bypass authentication:\n```http\nGET /api/user/search?username=%27+OR+1%3D1+-- HTTP/1.1\nHost: localhost:5000\n```\nWhen formatted, the query becomes:\n`SELECT id, username, email, role FROM users WHERE username = '' OR 1=1 --'`\nThis forces the WHERE clause to evaluate to true for every record in the `users` table, returning all users."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 70,
+                  "endLine": 72
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CWE-78",
+          "level": "error",
+          "message": {
+            "text": "OS Command Injection in /api/tools/ping via host Parameter: - **Source**: Untrusted user input enters the endpoint via the JSON request payload field `host` (`data.get('host', '')`) on line 107.\n- **Sanitization/Validation**: The application only checks that the field is non-empty (`if not host:`). It performs no validation, whitelisting (e.g. IP address or hostname validation), or shell escaping.\n- **Sink**: The unvalidated string is formatted into `command = f\"ping -c 1 {host}\"` and executed directly via `os.system(command)` on line 114, which spawns a system shell (`/bin/sh -c`).\n- **Data Flow**: The client posts a JSON payload containing shell metacharacters -> `host` is extracted -> String interpolation constructs the shell command -> `os.system` executes the command with shell interpretation, executing attacker-supplied commands with the privileges of the web application process.\n\n**Conceptual Exploit Payload**:\nSend a POST request with command chaining operators (e.g., `;`, `&&`, or `|`) in the `host` parameter:\n```http\nPOST /api/tools/ping HTTP/1.1\nHost: localhost:5000\nContent-Type: application/json\n\n{\n  \"host\": \"127.0.0.1; cat /etc/passwd\"\n}\n```\nThe resulting shell execution will run `ping -c 1 127.0.0.1` followed by `cat /etc/passwd`."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 113,
+                  "endLine": 114
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CWE-639: Authorization Bypass Through User-Controlled Key",
+          "level": "error",
+          "message": {
+            "text": "Insecure Direct Object Reference (IDOR) in /api/documents/<doc_id>: - **Source**: Untrusted user input enters the endpoint via the URL route parameter `doc_id` (`/api/documents/<int:doc_id>`) on line 82 and the `X-User-ID` request header on line 84.\n- **Sanitization/Validation**: The application checks whether `X-User-ID` header is present (`if not current_user_id: return 401`), but fails to perform any authorization check or access control validation to ensure `current_user_id` matches the document's `owner_id`.\n- **Sink**: The document is retrieved solely by primary key (`WHERE id = ?`) without ownership verification and returned to the caller on line 98 (`return jsonify({\"status\": \"success\", \"data\": dict(doc)})`).\n- **Data Flow**: A user supplies an arbitrary `doc_id` in the request path alongside any non-empty `X-User-ID` header -> The endpoint queries the document strictly by ID -> The record is returned without validating that `doc['owner_id'] == int(current_user_id)`.\n\n**Conceptual Exploit Payload**:\nAn unprivileged user with user ID 2 (Alice) sends a request to retrieve document ID 1 (Admin Confidential document owned by user ID 1):\n```http\nGET /api/documents/1 HTTP/1.1\nHost: localhost:5000\nX-User-ID: 2\n```\nBecause authorization checking is missing, the endpoint responds with HTTP 200 and the admin document's title and contents (`\"Super Secret Admin Report\"`)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 92,
+                  "endLine": 93
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CWE-639",
+          "level": "error",
+          "message": {
+            "text": "Insecure Direct Object Reference (IDOR) in /api/documents/<doc_id>: - **Source**: Untrusted user input enters the endpoint via the URL route parameter `doc_id` (`/api/documents/<int:doc_id>`) on line 82 and the `X-User-ID` request header on line 84.\n- **Sanitization/Validation**: The application checks whether `X-User-ID` header is present (`if not current_user_id: return 401`), but fails to perform any authorization check or access control validation to ensure `current_user_id` matches the document's `owner_id`.\n- **Sink**: The document is retrieved solely by primary key (`WHERE id = ?`) without ownership verification and returned to the caller on line 98 (`return jsonify({\"status\": \"success\", \"data\": dict(doc)})`).\n- **Data Flow**: A user supplies an arbitrary `doc_id` in the request path alongside any non-empty `X-User-ID` header -> The endpoint queries the document strictly by ID -> The record is returned without validating that `doc['owner_id'] == int(current_user_id)`.\n\n**Conceptual Exploit Payload**:\nAn unprivileged user with user ID 2 (Alice) sends a request to retrieve document ID 1 (Admin Confidential document owned by user ID 1):\n```http\nGET /api/documents/1 HTTP/1.1\nHost: localhost:5000\nX-User-ID: 2\n```\nBecause authorization checking is missing, the endpoint responds with HTTP 200 and the admin document's title and contents (`\"Super Secret Admin Report\"`)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 92,
+                  "endLine": 93
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
