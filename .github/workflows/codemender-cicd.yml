@@ -70,7 +70,7 @@ jobs:
 
       - name: Export SARIF Findings & Upload to GitHub Security
         run: |
-          cm report --format sarif | python3 -c "import sys, re, json; text = sys.stdin.read(); match = re.search(r'\{.*\}', text, re.DOTALL); data = json.loads(match.group(0)) if match else {}; print(json.dumps(data, indent=2))" > codemender-findings.sarif || true
+          cm report --format sarif | python3 -c "import sys, json; text = sys.stdin.read(); idx = text.find('{'); data = json.loads(text[idx:]) if idx != -1 else {}; print(json.dumps(data, indent=2))" > codemender-findings.sarif || true
 
       - name: Upload SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
