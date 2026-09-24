@@ -70,7 +70,7 @@ jobs:
 
       - name: Export SARIF Findings & Upload to GitHub Security
         run: |
-          cm report --format sarif > codemender-findings.sarif || true
+          cm report --format sarif 2>/dev/null | jq . > codemender-findings.sarif || true
 
       - name: Upload SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
@@ -83,7 +83,7 @@ jobs:
         if: github.event_name == 'pull_request' || inputs.auto_fix == true
         run: |
           echo "Extracting Critical and High findings..."
-          FINDINGS=$(cm report --format json 2>/dev/null | jq -r '.[] | select(.Status == "OPEN") | .FindingID' || echo "")
+          FINDINGS=$(cm report --format json 2>/dev/null | jq -r '.[]? | select(.Status == "OPEN") | .FindingID' || echo "")
           
           for ID in $FINDINGS; do
             echo "Running Verification for Finding: $ID"
