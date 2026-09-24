@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Ensure gcloud is in PATH
+export PATH="$PATH:/usr/local/google/home/rgaut/google-cloud-sdk/bin"
+
 # Workload Identity Federation (WIF) Setup Script for Google Cloud & GitHub Actions
 # Target Repository: rgaut-create/CodeMender
 
