@@ -1,37 +1,90 @@
-# 🛡️ CodeMender CI/CD Automated Security Remediation Demo
+# 🛡️ CodeMender: Shift-Left SDLC Security Automation & CI/CD Demo
 
-This repository demonstrates **CodeMender**—Google's autonomous AI security engineer—integrated directly into a GitHub Actions CI/CD pipeline using **Workload Identity Federation (WIF)** for keyless authentication to Google Cloud Vertex AI.
+This repository demonstrates **CodeMender**—Google's autonomous AI security engineer—integrated directly into the **Software Development Life Cycle (SDLC)** using a **Shift-Left Security Approach**.
+
+Using **Workload Identity Federation (WIF)** for keyless authentication to Google Cloud Vertex AI (`gemini-3.8-flash`), CodeMender automatically scans code, synthesizes exploit payloads to eliminate false positives, reports SARIF 2.1.0 findings to GitHub Security, and opens verified remediation Pull Requests.
 
 ---
 
-## 📚 Customer Presentation Decks & Guides
+## 🔄 Shift-Left SDLC Integration Paradigm
 
-All customer presentation scripts, PowerPoint slides, PDFs, and architecture flowcharts are available in the [`docs/`](./docs) folder:
+```mermaid
+flowchart LR
+    subgraph Dev ["1. Local IDE / CLI"]
+        Developer["Developer Code Edit"] --> LocalCLI["'./cm find' & './cm fix'"]
+    end
 
-| Asset | Format | Direct Link | Description |
+    subgraph Gate ["2. Pull Request Gate"]
+        LocalCLI --> PR["Git Commit / PR Push"]
+        PR --> WIF["Keyless GCP Auth (WIF)"]
+        WIF --> Engine["CodeMender Engine Scan"]
+    end
+
+    subgraph Auto ["3. Automated Patching"]
+        Engine --> SARIF["SARIF to GitHub Security"]
+        Engine --> TestSuite["Pytest Regression Check"]
+        TestSuite --> FixPR["Automated Remediation PR"]
+    end
+
+    subgraph Governance ["4. One-Click Merge"]
+        FixPR --> Merge["Developer Merges Patch"]
+    end
+```
+
+### 🎯 How CodeMender Shifts Security Left:
+1. **Developer Pre-Commit Stage (`./cm find` & `./cm fix`)**: Developers can run CodeMender locally in their terminal before committing code.
+2. **Pull Request Security Gate**: Automated scanning runs on every Pull Request to prevent vulnerable code from entering the `main` branch.
+3. **Keyless Cloud Security**: Authenticates via **Workload Identity Federation (WIF)** using short-lived OIDC tokens (Zero stored GCP service account keys).
+4. **Zero-Regression Remediation**: Runs local unit test suites (`pytest`) to verify fixes before opening automated Pull Requests.
+
+---
+
+## 📚 SDLC Documentation & Presentation Resources
+
+All presentation decks, architecture diagrams, PDFs, and SDLC guides are located in the [`docs/`](./docs) directory:
+
+| Document / Asset | Format | Direct Repository Link | Description |
 | :--- | :--- | :--- | :--- |
-| **PowerPoint Slide Deck** | `.pptx` | [`docs/CodeMender_Architecture_and_Overview.pptx`](./docs/CodeMender_Architecture_and_Overview.pptx) | Editable PowerPoint presentation covering architecture & ROI |
-| **Customer Presentation Script** | `.md` / `.pdf` | [`docs/CodeMender_Customer_Presentation_Guide.md`](./docs/CodeMender_Customer_Presentation_Guide.md) / [`PDF`](./docs/CodeMender_Customer_Presentation_Guide.pdf) | Step-by-step click-by-click script for presenting to customers |
-| **Architecture Slide Deck** | `.md` / `.pdf` | [`docs/CodeMender_Architecture_Presentation.md`](./docs/CodeMender_Architecture_Presentation.md) / [`PDF`](./docs/CodeMender_Architecture_Presentation.pdf) | Technical architecture & keyless WIF security design slides |
-| **CI/CD Flowchart** | `.md` | [`docs/CodeMender_CICD_Flow_Diagram.md`](./docs/CodeMender_CICD_Flow_Diagram.md) | Mermaid workflow diagram of CodeMender pipeline execution |
+| **Shift-Left SDLC Integration Guide** | `.md` / `.pdf` | [`docs/Shift_Left_SDLC_Integration.md`](./docs/Shift_Left_SDLC_Integration.md) / [`PDF`](./docs/Shift_Left_SDLC_Integration.pdf) | Detailed SDLC Shift-Left architecture & flow diagrams |
+| **Google Slides Deck** | Web / PDF | [Google Slides Link](https://docs.google.com/presentation/d/1FyIt-F-r1urcm85bs2iCAutGTTuqA_TM4uzyrU9zVyw) / [`PDF`](./docs/CodeMender_Google_Slides.pdf) | 6-slide presentation deck on Google Slides |
+| **PowerPoint Slide Deck** | `.pptx` | [`docs/CodeMender_Architecture_and_Overview.pptx`](./docs/CodeMender_Architecture_and_Overview.pptx) | Editable PowerPoint presentation deck |
+| **Customer Presentation Script** | `.md` / `.pdf` | [`docs/CodeMender_Customer_Presentation_Guide.md`](./docs/CodeMender_Customer_Presentation_Guide.md) / [`PDF`](./docs/CodeMender_Customer_Presentation_Guide.pdf) | Click-by-click customer demonstration script |
+| **Architecture Slide Deck** | `.md` / `.pdf` | [`docs/CodeMender_Architecture_Presentation.md`](./docs/CodeMender_Architecture_Presentation.md) / [`PDF`](./docs/CodeMender_Architecture_Presentation.pdf) | Technical architecture & WIF security design |
+| **CI/CD Flow Diagram** | `.md` | [`docs/CodeMender_CICD_Flow_Diagram.md`](./docs/CodeMender_CICD_Flow_Diagram.md) | Technical Mermaid execution workflow |
 
 ---
 
-## 🚀 Live Demo Quick Links
+## 🎬 Sequence Diagram: CodeMender Automated Remediation
 
-1. **Vulnerable Application Code**: [`app.py`](./app.py)
-2. **GitHub Security Alerts**: [Security $\rightarrow$ Code scanning](https://github.com/rgaut-create/CodeMender/security/code-scanning)
-3. **CI/CD Pipeline Runs**: [Actions $\rightarrow$ Workflows](https://github.com/rgaut-create/CodeMender/actions)
-4. **Automated Remediation PR**: [Pull Requests $\rightarrow$ PR #1](https://github.com/rgaut-create/CodeMender/pull/1)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Developer
+    participant GitHub as GitHub Repository
+    participant Actions as GitHub Actions Runner
+    participant WIF as GCP Workload Identity Federation
+    participant VertexAI as Vertex AI (gemini-3.8-flash)
+    participant CodeScanning as GitHub Security Hub
+
+    Developer->>GitHub: Push code / Open Pull Request
+    GitHub->>Actions: Trigger CodeMender Workflow
+    Actions->>WIF: OIDC Token Exchange (Keyless Auth)
+    WIF-->>Actions: Return Short-Lived Access Token
+    Actions->>VertexAI: Execute './cm find app.py'
+    VertexAI-->>Actions: Return Findings (SQLi, RCE, IDOR)
+    Actions->>CodeScanning: Upload SARIF 2.1.0 Findings
+    Actions->>VertexAI: Execute './cm verify' & './cm fix'
+    VertexAI-->>Actions: Generate Verified Patch & Run Pytest
+    Actions->>GitHub: Open Automated Remediation Pull Request
+    GitHub-->>Developer: Notify Developer of Ready-to-Merge Fix PR
+```
 
 ---
 
-## 🛠️ Application & Security Features
+## 🛠️ Demonstration Application & Live Links
 
-- **Vulnerable Endpoints in `app.py`**:
-  - `/api/user/search`: SQL Injection (`CWE-89`)
-  - `/api/documents/<id>`: Insecure Direct Object Reference / IDOR (`CWE-639`)
-  - `/api/tools/ping`: Remote OS Command Execution (`CWE-78`)
-- **Pytest Suite**: [`test_app.py`](./test_app.py) for regression testing pre- and post-patching.
-- **Keyless Authentication**: Google Cloud Workload Identity Federation (WIF) OIDC token exchange.
-- **SARIF 2.1.0 Export**: Direct upload into GitHub Code Scanning security hub.
+- **Vulnerable Application Code**: [`app.py`](./app.py) (Contains SQL Injection, IDOR, and RCE)
+- **Pytest Unit Test Suite**: [`test_app.py`](./test_app.py)
+- **GitHub Code Scanning Alerts**: [Security $\rightarrow$ Code scanning](https://github.com/rgaut-create/CodeMender/security/code-scanning)
+- **Automated Fix Pull Request**: [Pull Requests $\rightarrow$ PR #1](https://github.com/rgaut-create/CodeMender/pull/1)
+- **CI/CD Workflow Config**: [`.github/workflows/codemender-cicd.yml`](./.github/workflows/codemender-cicd.yml)
