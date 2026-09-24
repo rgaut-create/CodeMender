@@ -41,15 +41,12 @@ flowchart LR
 
 ## 📚 SDLC Documentation & Presentation Resources
 
-All presentation decks, architecture diagrams, PDFs, and SDLC guides are located in the [`docs/`](./docs) directory:
+All presentation guides, architecture diagrams, PDFs, and SDLC guides are located in the [`docs/`](./docs) directory:
 
 | Document / Asset | Format | Direct Repository Link | Description |
 | :--- | :--- | :--- | :--- |
 | **Shift-Left SDLC Integration Guide** | `.md` / `.pdf` | [`docs/Shift_Left_SDLC_Integration.md`](./docs/Shift_Left_SDLC_Integration.md) / [`PDF`](./docs/Shift_Left_SDLC_Integration.pdf) | Detailed SDLC Shift-Left architecture & flow diagrams |
-| **Google Slides Deck** | Web / PDF | [Google Slides Link](https://docs.google.com/presentation/d/1FyIt-F-r1urcm85bs2iCAutGTTuqA_TM4uzyrU9zVyw) / [`PDF`](./docs/CodeMender_Google_Slides.pdf) | 6-slide presentation deck on Google Slides |
-| **PowerPoint Slide Deck** | `.pptx` | [`docs/CodeMender_Architecture_and_Overview.pptx`](./docs/CodeMender_Architecture_and_Overview.pptx) | Editable PowerPoint presentation deck |
 | **Customer Presentation Script** | `.md` / `.pdf` | [`docs/CodeMender_Customer_Presentation_Guide.md`](./docs/CodeMender_Customer_Presentation_Guide.md) / [`PDF`](./docs/CodeMender_Customer_Presentation_Guide.pdf) | Click-by-click customer demonstration script |
-| **Architecture Slide Deck** | `.md` / `.pdf` | [`docs/CodeMender_Architecture_Presentation.md`](./docs/CodeMender_Architecture_Presentation.md) / [`PDF`](./docs/CodeMender_Architecture_Presentation.pdf) | Technical architecture & WIF security design |
 | **CI/CD Flow Diagram** | `.md` | [`docs/CodeMender_CICD_Flow_Diagram.md`](./docs/CodeMender_CICD_Flow_Diagram.md) | Technical Mermaid execution workflow |
 
 ---
