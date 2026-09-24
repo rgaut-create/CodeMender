@@ -80,7 +80,6 @@ jobs:
           category: codemender
 
       - name: CodeMender Verify & Fix Stage
-        if: github.event_name == 'pull_request' || inputs.auto_fix == true
         run: |
           echo "Extracting Critical and High findings..."
           FINDINGS=$(cm report --format json 2>/dev/null | jq -r '.[]? | select(.Status == "OPEN") | .FindingID' || echo "")
@@ -94,7 +93,6 @@ jobs:
           done
 
       - name: Create Fix Pull Request
-        if: github.event_name != 'pull_request' && inputs.auto_fix == true
         uses: peter-evans/create-pull-request@v6
         continue-on-error: true
         with:
