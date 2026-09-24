@@ -1,0 +1,136 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeMender",
+          "version": "dev"
+        }
+      },
+      "results": [
+        {
+          "ruleId": "SQL Injection",
+          "level": "error",
+          "message": {
+            "text": "SQL Injection in User Search Endpoint: - **Source**: Untrusted user input enters via the `username` query parameter from the HTTP GET request at line 65 (`request.args.get('username', '')`).\n- **Sanitization/Validation**: There is no sanitization, escaping, or input validation performed on `username`.\n- **Sink**: The unvalidated string is interpolated directly into an SQL query string via an f-string at line 70 (`f\"SELECT id, username, email, role FROM users WHERE username = '{username}'\"`) and executed directly by SQLite via `cursor.execute(query)` at line 72.\n- **Conceptual Exploit Payload**:\n  Sending an HTTP GET request to `/api/user/search?username=' UNION SELECT id, owner_id, title, content FROM documents --` breaks out of the SQL string literal, allowing an attacker to extract unauthorized records from other tables in the database."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 70,
+                  "endLine": 72
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "Command Injection",
+          "level": "error",
+          "message": {
+            "text": "OS Command Injection in Ping Tool Endpoint: - **Source**: Untrusted user input enters via the JSON payload field `host` in the HTTP POST request at line 107 (`host = data.get('host', '')`).\n- **Sanitization/Validation**: The application only checks whether the `host` parameter is non-empty (`if not host:`). No validation, sanitization, or shell character escaping is performed.\n- **Sink**: The untrusted input is interpolated into a shell command string at line 113 (`command = f\"ping -c 1 {host}\"`) and passed directly to the operating system shell via `os.system(command)` at line 114.\n- **Conceptual Exploit Payload**:\n  An attacker issues the following HTTP POST request:\n  ```http\n  POST /api/tools/ping HTTP/1.1\n  Host: localhost:5000\n  Content-Type: application/json\n\n  {\"host\": \"127.0.0.1; id\"}\n  ```\n  The shell executes `ping -c 1 127.0.0.1; id`, resulting in arbitrary command execution on the host server."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 113,
+                  "endLine": 114
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SQL INJECTION",
+          "level": "error",
+          "message": {
+            "text": "SQL Injection in User Search Endpoint: - **Source**: Untrusted user input enters via the `username` query parameter from the HTTP GET request at line 65 (`request.args.get('username', '')`).\n- **Sanitization/Validation**: There is no sanitization, escaping, or input validation performed on `username`.\n- **Sink**: The unvalidated string is interpolated directly into an SQL query string via an f-string at line 70 (`f\"SELECT id, username, email, role FROM users WHERE username = '{username}'\"`) and executed directly by SQLite via `cursor.execute(query)` at line 72.\n- **Conceptual Exploit Payload**:\n  Sending an HTTP GET request to `/api/user/search?username=' UNION SELECT id, owner_id, title, content FROM documents --` breaks out of the SQL string literal, allowing an attacker to extract unauthorized records from other tables in the database."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 70,
+                  "endLine": 72
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "COMMAND INJECTION",
+          "level": "error",
+          "message": {
+            "text": "OS Command Injection in Ping Tool Endpoint: - **Source**: Untrusted user input enters via the JSON payload field `host` in the HTTP POST request at line 107 (`host = data.get('host', '')`).\n- **Sanitization/Validation**: The application only checks whether the `host` parameter is non-empty (`if not host:`). No validation, sanitization, or shell character escaping is performed.\n- **Sink**: The untrusted input is interpolated into a shell command string at line 113 (`command = f\"ping -c 1 {host}\"`) and passed directly to the operating system shell via `os.system(command)` at line 114.\n- **Conceptual Exploit Payload**:\n  An attacker issues the following HTTP POST request:\n  ```http\n  POST /api/tools/ping HTTP/1.1\n  Host: localhost:5000\n  Content-Type: application/json\n\n  {\"host\": \"127.0.0.1; id\"}\n  ```\n  The shell executes `ping -c 1 127.0.0.1; id`, resulting in arbitrary command execution on the host server."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 113,
+                  "endLine": 114
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "Insecure Direct Object Reference (IDOR)",
+          "level": "error",
+          "message": {
+            "text": "Insecure Direct Object Reference (IDOR) in Document Retrieval: - **Source**: Untrusted user input enters via the URL path parameter `doc_id` at line 82 (`/api/documents/<int:doc_id>`) along with the user identity provided in the `X-User-ID` HTTP header at line 84.\n- **Sanitization/Validation**: The application validates only that the `X-User-ID` header is present (`if not current_user_id:`), but fails to verify that the requesting user (`current_user_id`) is authorized to view the requested document or matches the document's `owner_id`.\n- **Sink**: The document record is retrieved directly using only `id = ?` at line 92 (`cursor.execute(\"SELECT id, owner_id, title, content FROM documents WHERE id = ?\", (doc_id,))`) and returned in the HTTP response at line 98 without any authorization or ownership check.\n- **Conceptual Exploit Payload**:\n  An unprivileged or different authenticated user issues:\n  ```http\n  GET /api/documents/1 HTTP/1.1\n  Host: localhost:5000\n  X-User-ID: 2\n  ```\n  The endpoint responds with status 200 and the content of document ID 1 (`Admin Confidential`), leaking sensitive data belonging to another user."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 92,
+                  "endLine": 93
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "INSECURE DIRECT OBJECT REFERENCE (IDOR)",
+          "level": "error",
+          "message": {
+            "text": "Insecure Direct Object Reference (IDOR) in Document Retrieval: - **Source**: Untrusted user input enters via the URL path parameter `doc_id` at line 82 (`/api/documents/<int:doc_id>`) along with the user identity provided in the `X-User-ID` HTTP header at line 84.\n- **Sanitization/Validation**: The application validates only that the `X-User-ID` header is present (`if not current_user_id:`), but fails to verify that the requesting user (`current_user_id`) is authorized to view the requested document or matches the document's `owner_id`.\n- **Sink**: The document record is retrieved directly using only `id = ?` at line 92 (`cursor.execute(\"SELECT id, owner_id, title, content FROM documents WHERE id = ?\", (doc_id,))`) and returned in the HTTP response at line 98 without any authorization or ownership check.\n- **Conceptual Exploit Payload**:\n  An unprivileged or different authenticated user issues:\n  ```http\n  GET /api/documents/1 HTTP/1.1\n  Host: localhost:5000\n  X-User-ID: 2\n  ```\n  The endpoint responds with status 200 and the content of document ID 1 (`Admin Confidential`), leaking sensitive data belonging to another user."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 92,
+                  "endLine": 93
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
