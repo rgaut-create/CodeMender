@@ -1,0 +1,136 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeMender",
+          "version": "dev"
+        }
+      },
+      "results": [
+        {
+          "ruleId": "SQL Injection",
+          "level": "error",
+          "message": {
+            "text": "SQL Injection via Unsanitized User Input in /api/user/search: ### Data Path Trace:\n- **Source**: Untrusted user input enters through the query parameter `username` via `request.args.get('username', '')` at line 65.\n- **Sanitization/Validation**: There is no sanitization or input validation applied to `username`. It is directly formatted into an SQL query string using Python f-string interpolation at line 70.\n- **Sink**: The formatted SQL string is executed by the database cursor at line 72: `cursor.execute(query)`.\n\n### Impact:\nAn attacker can manipulate the SQL query structure to bypass authentication, extract arbitrary data from the database (including other user credentials and roles), or execute SQLite-supported operations.\n\n### Conceptual Exploit Payload:\nSend an HTTP GET request with an SQL injection payload in the `username` query parameter:\n```http\nGET /api/user/search?username='%20OR%20'1'='1 HTTP/1.1\nHost: localhost:5000\n```\nAlternatively, extracting data using UNION:\n```http\nGET /api/user/search?username='%20UNION%20SELECT%20id,%20title,%20content,%20owner_id%20FROM%20documents-- HTTP/1.1\nHost: localhost:5000\n```\nThis causes the backend to execute:\n`SELECT id, username, email, role FROM users WHERE username = '' OR '1'='1'`\nwhich returns all user records."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 70,
+                  "endLine": 72
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OS Command Injection",
+          "level": "error",
+          "message": {
+            "text": "OS Command Injection in /api/tools/ping: ### Data Path Trace:\n- **Source**: Untrusted user input enters via the JSON body key `host` in `data = request.get_json() or {}` and `host = data.get('host', '')` at lines 106-107.\n- **Sanitization/Validation**: The application only checks whether `host` is non-empty (`if not host:`). It performs no validation (such as IP/hostname regex checking) or shell-argument sanitization.\n- **Sink**: The variable `host` is concatenated directly into a shell command string `command = f\"ping -c 1 {host}\"` and executed via `os.system(command)` at lines 113-114.\n\n### Impact:\nAn attacker can execute arbitrary operating system commands with the privileges of the web application process, leading to full host compromise (Remote Code Execution).\n\n### Conceptual Exploit Payload:\nSend an HTTP POST request to `/api/tools/ping` with a command separator in the `host` JSON field:\n```http\nPOST /api/tools/ping HTTP/1.1\nHost: localhost:5000\nContent-Type: application/json\n\n{\n    \"host\": \"127.0.0.1; whoami\"\n}\n```\nThis causes `os.system()` to execute `ping -c 1 127.0.0.1; whoami`, running the injected command on the server."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 113,
+                  "endLine": 114
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SQL INJECTION",
+          "level": "error",
+          "message": {
+            "text": "SQL Injection via Unsanitized User Input in /api/user/search: ### Data Path Trace:\n- **Source**: Untrusted user input enters through the query parameter `username` via `request.args.get('username', '')` at line 65.\n- **Sanitization/Validation**: There is no sanitization or input validation applied to `username`. It is directly formatted into an SQL query string using Python f-string interpolation at line 70.\n- **Sink**: The formatted SQL string is executed by the database cursor at line 72: `cursor.execute(query)`.\n\n### Impact:\nAn attacker can manipulate the SQL query structure to bypass authentication, extract arbitrary data from the database (including other user credentials and roles), or execute SQLite-supported operations.\n\n### Conceptual Exploit Payload:\nSend an HTTP GET request with an SQL injection payload in the `username` query parameter:\n```http\nGET /api/user/search?username='%20OR%20'1'='1 HTTP/1.1\nHost: localhost:5000\n```\nAlternatively, extracting data using UNION:\n```http\nGET /api/user/search?username='%20UNION%20SELECT%20id,%20title,%20content,%20owner_id%20FROM%20documents-- HTTP/1.1\nHost: localhost:5000\n```\nThis causes the backend to execute:\n`SELECT id, username, email, role FROM users WHERE username = '' OR '1'='1'`\nwhich returns all user records."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 70,
+                  "endLine": 72
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OS COMMAND INJECTION",
+          "level": "error",
+          "message": {
+            "text": "OS Command Injection in /api/tools/ping: ### Data Path Trace:\n- **Source**: Untrusted user input enters via the JSON body key `host` in `data = request.get_json() or {}` and `host = data.get('host', '')` at lines 106-107.\n- **Sanitization/Validation**: The application only checks whether `host` is non-empty (`if not host:`). It performs no validation (such as IP/hostname regex checking) or shell-argument sanitization.\n- **Sink**: The variable `host` is concatenated directly into a shell command string `command = f\"ping -c 1 {host}\"` and executed via `os.system(command)` at lines 113-114.\n\n### Impact:\nAn attacker can execute arbitrary operating system commands with the privileges of the web application process, leading to full host compromise (Remote Code Execution).\n\n### Conceptual Exploit Payload:\nSend an HTTP POST request to `/api/tools/ping` with a command separator in the `host` JSON field:\n```http\nPOST /api/tools/ping HTTP/1.1\nHost: localhost:5000\nContent-Type: application/json\n\n{\n    \"host\": \"127.0.0.1; whoami\"\n}\n```\nThis causes `os.system()` to execute `ping -c 1 127.0.0.1; whoami`, running the injected command on the server."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 113,
+                  "endLine": 114
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "Broken Access Control",
+          "level": "error",
+          "message": {
+            "text": "Insecure Direct Object Reference (IDOR) in /api/documents/<doc_id>: ### Data Path Trace:\n- **Source**: Untrusted user input enters via the URL path parameter `doc_id` in `/api/documents/<int:doc_id>` and the `X-User-ID` request header at line 84.\n- **Sanitization/Validation**: The endpoint verifies the presence of the `X-User-ID` header (`if not current_user_id:`), but never validates whether the requesting user (`current_user_id`) actually owns the requested document or possesses authorization to view it.\n- **Sink**: The SQL query fetches the document record solely by `doc_id` at line 92 without checking `owner_id`, and returns the sensitive document content directly to the caller at line 98: `return jsonify({\"status\": \"success\", \"data\": dict(doc)})`.\n\n### Impact:\nAny authenticated user can read documents belonging to any other user or administrator (e.g. document 1: \"Admin Confidential\") simply by changing the `doc_id` integer in the path.\n\n### Conceptual Exploit Payload:\nA non-privileged user (e.g., Bob with user ID 3) requests document ID 1 (belonging to Admin):\n```http\nGET /api/documents/1 HTTP/1.1\nHost: localhost:5000\nX-User-ID: 3\n```\nThe server queries `SELECT id, owner_id, title, content FROM documents WHERE id = 1` without filtering by `owner_id = 3`, returning the admin's confidential document in the JSON response."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 92,
+                  "endLine": 93
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "BROKEN ACCESS CONTROL",
+          "level": "error",
+          "message": {
+            "text": "Insecure Direct Object Reference (IDOR) in /api/documents/<doc_id>: ### Data Path Trace:\n- **Source**: Untrusted user input enters via the URL path parameter `doc_id` in `/api/documents/<int:doc_id>` and the `X-User-ID` request header at line 84.\n- **Sanitization/Validation**: The endpoint verifies the presence of the `X-User-ID` header (`if not current_user_id:`), but never validates whether the requesting user (`current_user_id`) actually owns the requested document or possesses authorization to view it.\n- **Sink**: The SQL query fetches the document record solely by `doc_id` at line 92 without checking `owner_id`, and returns the sensitive document content directly to the caller at line 98: `return jsonify({\"status\": \"success\", \"data\": dict(doc)})`.\n\n### Impact:\nAny authenticated user can read documents belonging to any other user or administrator (e.g. document 1: \"Admin Confidential\") simply by changing the `doc_id` integer in the path.\n\n### Conceptual Exploit Payload:\nA non-privileged user (e.g., Bob with user ID 3) requests document ID 1 (belonging to Admin):\n```http\nGET /api/documents/1 HTTP/1.1\nHost: localhost:5000\nX-User-ID: 3\n```\nThe server queries `SELECT id, owner_id, title, content FROM documents WHERE id = 1` without filtering by `owner_id = 3`, returning the admin's confidential document in the JSON response."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.py"
+                },
+                "region": {
+                  "startLine": 92,
+                  "endLine": 93
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
